@@ -49,7 +49,7 @@ def predict():
 
         rforest_pred = rforest.predict(input_data)[0]
 
-        return jsonify({'Random Forest': rforest_pred})
+        return jsonify({'Crop': rforest_pred})
     
     except Exception as e:
         return jsonify({'error': str(e)}), 500
