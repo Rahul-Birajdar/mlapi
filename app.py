@@ -9,7 +9,8 @@ from flask_cors import CORS
 app = Flask(__name__)
 CORS(app)
 
-# Load the dataset and preprocess it
+# Load the dataset and preprocess it.\venv\Scripts\activate
+
 data = pd.read_csv('CP.csv')
 label_encoder = LabelEncoder()
 data['STATE'] = label_encoder.fit_transform(data['STATE'])
