@@ -3,9 +3,11 @@ import numpy as np
 import pandas as pd
 import pickle
 from sklearn.preprocessing import LabelEncoder
+from flask_cors import CORS
 
 # Initialize the Flask app
 app = Flask(__name__)
+CORS(app)
 
 # Load the dataset and preprocess it
 data = pd.read_csv('CP.csv')
