@@ -36,12 +36,17 @@ def predict():
         data = request.get_json()
 
         # Validate input data
-        if not all(key in data for key in ['Temperature', 'Humidity', 'STATE']):
-            return jsonify({'error': 'Missing required fields'}), 400
+        required_fields = ['Nitrogen', 'Phosphorus', 'Potassium', 'Temperature', 'Humidity', 'Rainfall', 'STATE']
+        if not all(field in data for field in required_fields):
+            return jsonify({'error': f'Missing required fields: {", ".join([field for field in required_fields if field not in data])}'}), 400
 
         # Get the input values from the JSON
+        Nitrogen = float(data['Nitrogen'])
+        Phosphorus = float(data['Phosphorus'])
+        Potassium = float(data['Potassium'])
         Temperature = float(data['Temperature'])
         Humidity = float(data['Humidity'])
+        Rainfall = float(data['Rainfall'])
         STATE = data['STATE']
 
         # Validate the state
@@ -52,13 +57,13 @@ def predict():
         state_encoded = state_mapping[STATE]
 
         # Prepare the input for the model
-        input_data = np.array([[Temperature, Humidity, state_encoded]])
+        input_data = np.array([[Nitrogen, Phosphorus, Potassium, Temperature, Humidity, Rainfall, state_encoded]])
         input_data = scaler.transform(input_data)
 
         # Make the prediction using the Random Forest model
         rforest_pred = rforest.predict(input_data)[0]
 
-        # Return the predicted crop in the format "Crop - <prediction>"
+        # Return the predicted crop
         return jsonify({'Crop': f'Crop - {rforest_pred}'})
     
     except KeyError as ke:
