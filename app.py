@@ -4,6 +4,11 @@ import pandas as pd
 import pickle
 from sklearn.preprocessing import LabelEncoder
 from flask_cors import CORS
+import requests
+import schedule
+import time
+from datetime import datetime
+import threading
 
 # Initialize the Flask app
 app = Flask(__name__)
@@ -27,7 +32,7 @@ with open('rforest_model.pkl', 'rb') as f:
 # Add a route for the home page
 @app.route('/')
 def home():
-    return "API is running. Use POST /predict to get crop predictions."
+    return "API is running successfully. Use POST /predict to get crop predictions."
 
 @app.route('/predict', methods=['POST'])
 def predict():
@@ -38,7 +43,8 @@ def predict():
         # Validate input data
         required_fields = ['Nitrogen', 'Phosphorus', 'Potassium', 'Temperature', 'Humidity', 'Rainfall', 'STATE']
         if not all(field in data for field in required_fields):
-            return jsonify({'error': f'Missing required fields: {", ".join([field for field in required_fields if field not in data])}'}), 400
+            missing_fields = [field for field in required_fields if field not in data]
+            return jsonify({'error': f'Missing required fields: {", ".join(missing_fields)}'}), 400
 
         # Get the input values from the JSON
         Nitrogen = float(data['Nitrogen'])
@@ -71,6 +77,26 @@ def predict():
     
     except Exception as e:
         return jsonify({'error': str(e)}), 500
+
+# Function to periodically reload the website
+def reload_website():
+    try:
+        response = requests.get("https://mlapi-8t0g.onrender.com")  # Use the appropriate URL if different
+        print(f"Reloaded at {datetime.now().isoformat()}: Status Code {response.status_code}")
+    except requests.exceptions.RequestException as error:
+        print(f"Error reloading at {datetime.now().isoformat()}: {error}")
+
+# Schedule the reload function to run at the specified interval
+def start_scheduler():
+    schedule.every(30).seconds.do(reload_website)  # Set interval to 30 seconds
+    while True:
+        schedule.run_pending()
+        time.sleep(1)
+
+# Start the scheduler in a separate thread to avoid blocking the Flask app
+scheduler_thread = threading.Thread(target=start_scheduler)
+scheduler_thread.daemon = True
+scheduler_thread.start()
 
 if __name__ == '__main__':
     app.run(debug=True)
