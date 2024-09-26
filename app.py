@@ -11,17 +11,12 @@ CORS(app)
 
 # Load the dataset and preprocess it
 data = pd.read_csv('CP.csv')
-label_encoder = LabelEncoder()
-data['STATE'] = label_encoder.fit_transform(data['STATE'])
-
-# Create a dictionary to reverse map the label encoding
-state_mapping = dict(zip(label_encoder.classes_, label_encoder.transform(label_encoder.classes_)))
 
 # Load the scaler and trained models
-with open('scaler.pkl', 'rb') as f:
+with open('s.pkl', 'rb') as f:
     scaler = pickle.load(f)
 
-with open('rforest_model.pkl', 'rb') as f:
+with open('m.pkl', 'rb') as f:
     rforest = pickle.load(f)
 
 # Add a route for the home page
@@ -36,7 +31,7 @@ def predict():
         data = request.get_json()
 
         # Validate input data
-        required_fields = ['Nitrogen', 'Phosphorus', 'Potassium', 'Temperature', 'Humidity', 'Rainfall', 'STATE']
+        required_fields = ['Nitrogen', 'Phosphorus', 'Potassium', 'Temperature', 'Humidity', 'Rainfall']
         if not all(field in data for field in required_fields):
             return jsonify({'error': f'Missing required fields: {", ".join([field for field in required_fields if field not in data])}'}), 400
 
@@ -47,17 +42,9 @@ def predict():
         Temperature = float(data['Temperature'])
         Humidity = float(data['Humidity'])
         Rainfall = float(data['Rainfall'])
-        STATE = data['STATE']
-
-        # Validate the state
-        if STATE not in state_mapping:
-            return jsonify({'error': 'Invalid state provided'}), 400
-
-        # Encode the state using label encoding
-        state_encoded = state_mapping[STATE]
 
         # Prepare the input for the model
-        input_data = np.array([[Nitrogen, Phosphorus, Potassium, Temperature, Humidity, Rainfall, state_encoded]])
+        input_data = np.array([[Nitrogen, Phosphorus, Potassium, Temperature, Humidity, Rainfall]])
         input_data = scaler.transform(input_data)
 
         # Make the prediction using the Random Forest model
