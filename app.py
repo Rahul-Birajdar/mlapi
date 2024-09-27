@@ -2,7 +2,7 @@ from flask import Flask, request, jsonify
 import numpy as np
 import pandas as pd
 import pickle
-from sklearn import naive_bayes
+from sklearn.naive_bayes import GaussianNB  # Import the actual Naive Bayes classifier
 from sklearn.preprocessing import LabelEncoder
 from flask_cors import CORS
 
@@ -10,15 +10,24 @@ from flask_cors import CORS
 app = Flask(__name__)
 CORS(app)
 
-# Load the dataset and preprocess it
+# Load the dataset and preprocess it (optional, depending on use case)
 data = pd.read_csv('CP.csv')
 
 # Load the scaler and trained models
 with open('S.pkl', 'rb') as f:
     scaler = pickle.load(f)
 
-with open('M.pkl', 'rb') as f:
-    rforest = pickle.load(f)
+# Load the Random Forest model or any other model you want to use
+#with open('M.pkl', 'rb') as f:
+#    rforest = pickle.load(f)
+
+# You should initialize or load the Naive Bayes model if needed
+# Here you can initialize a Naive Bayes model, but make sure you have trained one
+naive_bayes = GaussianNB()
+
+# You could also load a trained Naive Bayes model if you have saved it, for example:
+with open('NB.pkl', 'rb') as f:
+     naive_bayes = pickle.load(f)
 
 # Add a route for the home page
 @app.route('/')
@@ -48,11 +57,16 @@ def predict():
         input_data = np.array([[Nitrogen, Phosphorus, Potassium, Temperature, Humidity, Rainfall]])
         input_data = scaler.transform(input_data)
 
-        # Make the prediction using the Random Forest model
+        # Make the prediction using the Random Forest model or Naive Bayes
+        # Uncomment the model you wish to use:
+        
+        # Random Forest prediction
+        # rforest_pred = rforest.predict(input_data)[0]
+        # return jsonify({'Crop': f'Predicted Crop - {rforest_pred}'})
+        
+        # Naive Bayes prediction
         nb_pred = naive_bayes.predict(input_data)[0]
-
-        # Return the predicted crop
-        return jsonify({'Crop': f'Crop - {nb_pred}'})
+        return jsonify({'Crop': f'Predicted Crop - {nb_pred}'})
     
     except KeyError as ke:
         return jsonify({'error': f'Missing key: {ke}'}), 400
