@@ -26,7 +26,7 @@ with open('S.pkl', 'rb') as f:
 naive_bayes = GaussianNB()
 
 # You could also load a trained Naive Bayes model if you have saved it, for example:
-with open('NB.pkl', 'rb') as f:
+with open('M.pkl', 'rb') as f:
      naive_bayes = pickle.load(f)
 
 # Add a route for the home page
