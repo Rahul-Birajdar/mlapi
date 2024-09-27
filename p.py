@@ -27,6 +27,7 @@ from sklearn.preprocessing import StandardScaler
 from sklearn.linear_model import LogisticRegression
 from sklearn.tree import DecisionTreeClassifier
 from sklearn.ensemble import RandomForestClassifier
+from sklearn.naive_bayes import GaussianNB
 from sklearn.metrics import accuracy_score
 import pickle
 
@@ -52,32 +53,38 @@ X_test_scaled = scaler.transform(X_test)
 logreg = LogisticRegression(max_iter=1000)
 dtree = DecisionTreeClassifier()
 rforest = RandomForestClassifier()
+naive_bayes = GaussianNB()
 
 # Train the models
 logreg.fit(X_train_scaled, y_train)
 dtree.fit(X_train_scaled, y_train)
 rforest.fit(X_train_scaled, y_train)
+naive_bayes.fit(X_train_scaled, y_train)
 
 # Make predictions using scaled test data
 logreg_pred = logreg.predict(X_test_scaled)
 dtree_pred = dtree.predict(X_test_scaled)
 rforest_pred = rforest.predict(X_test_scaled)
+nb_pred = naive_bayes.predict(X_test_scaled)
 
 # Calculate accuracy for each model
 logreg_acc = accuracy_score(y_test, logreg_pred)
 dtree_acc = accuracy_score(y_test, dtree_pred)
 rforest_acc = accuracy_score(y_test, rforest_pred)
+nb_acc = accuracy_score(y_test, nb_pred)
 
 # Print accuracies
 print(f'Logistic Regression Accuracy: {logreg_acc:.2f}')
 print(f'Decision Tree Accuracy: {dtree_acc:.2f}')
 print(f'Random Forest Accuracy: {rforest_acc:.2f}')
+print(f'Naive Bayes Accuracy: {nb_acc:.2f}')
 
 # Save the scaler and Random Forest model as pickle files
 with open('S.pkl', 'wb') as f:
     pickle.dump(scaler, f)
 
 with open('M.pkl', 'wb') as f:
-    pickle.dump(rforest, f)
+    pickle.dump(naive_bayes, f)
 
-print("Scaler and Random Forest model saved successfully.")
+print("Scaler and Model saved successfully.")
+

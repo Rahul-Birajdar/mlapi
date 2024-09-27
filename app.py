@@ -2,6 +2,7 @@ from flask import Flask, request, jsonify
 import numpy as np
 import pandas as pd
 import pickle
+from sklearn import naive_bayes
 from sklearn.preprocessing import LabelEncoder
 from flask_cors import CORS
 
@@ -48,10 +49,10 @@ def predict():
         input_data = scaler.transform(input_data)
 
         # Make the prediction using the Random Forest model
-        rforest_pred = rforest.predict(input_data)[0]
+        nb_pred = naive_bayes.predict(input_data)[0]
 
         # Return the predicted crop
-        return jsonify({'Crop': f'Crop - {rforest_pred}'})
+        return jsonify({'Crop': f'Crop - {nb_pred}'})
     
     except KeyError as ke:
         return jsonify({'error': f'Missing key: {ke}'}), 400
