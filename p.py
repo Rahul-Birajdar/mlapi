@@ -20,24 +20,36 @@ for param in parameters:
     print(f"Highest {param}: {highest}")
     print(f"Lowest {param}: {lowest}")
 
-    
+
 import pandas as pd
-from sklearn.model_selection import train_test_split
-from sklearn.preprocessing import StandardScaler
-from sklearn.linear_model import LogisticRegression
-from sklearn.tree import DecisionTreeClassifier
-from sklearn.ensemble import RandomForestClassifier
-from sklearn.naive_bayes import GaussianNB
-from sklearn.metrics import accuracy_score
-import pickle
 
 # Load the dataset
 data = pd.read_csv('CP.csv')
 
-# Ensure that only the relevant columns are used (excluding 'STATE')
-data = data[['Nitrogen', 'Phosphorus', 'Potassium', 'Temperature', 'Humidity', 'Rainfall', 'Crop']]
+# Get unique states (as original strings)
+fertilizer = data['Fertilizer'].unique()
+print("Fertilizer:", fertilizer)
 
-# Split the data into features and target
+
+######################################################################
+
+import pandas as pd
+from sklearn.model_selection import train_test_split
+from sklearn.preprocessing import StandardScaler
+from sklearn.ensemble import RandomForestClassifier
+from sklearn.linear_model import LogisticRegression
+from sklearn.tree import DecisionTreeClassifier
+from sklearn.naive_bayes import GaussianNB
+from sklearn.metrics import accuracy_score
+import pickle
+
+# Load the dataset (ensure the Fertilizer column is present)
+data = pd.read_csv('CP.csv')
+
+# Display dataset structure (optional)
+print(data.head())
+
+# Split the data into features (X) and target (y)
 X = data[['Nitrogen', 'Phosphorus', 'Potassium', 'Temperature', 'Humidity', 'Rainfall']]
 y = data['Crop']
 
@@ -61,7 +73,7 @@ dtree.fit(X_train_scaled, y_train)
 rforest.fit(X_train_scaled, y_train)
 naive_bayes.fit(X_train_scaled, y_train)
 
-# Make predictions using scaled test data
+# Make predictions using the test data
 logreg_pred = logreg.predict(X_test_scaled)
 dtree_pred = dtree.predict(X_test_scaled)
 rforest_pred = rforest.predict(X_test_scaled)
@@ -79,12 +91,25 @@ print(f'Decision Tree Accuracy: {dtree_acc:.2f}')
 print(f'Random Forest Accuracy: {rforest_acc:.2f}')
 print(f'Naive Bayes Accuracy: {nb_acc:.2f}')
 
-# Save the scaler and Random Forest model as pickle files
-with open('S.pkl', 'wb') as f:
+# Use Naive Bayes for final prediction and fertilizer recommendation
+X_test['Predicted Crop'] = nb_pred  # Naive Bayes predictions
+
+# Map the predicted crop to the corresponding fertilizer from the original dataset
+# Ensure the Crop and Fertilizer columns have unique combinations
+# We group by Crop to handle any duplicates and keep the first fertilizer for each crop
+fertilizer_map = data.groupby('Crop')['Fertilizer'].first()
+
+# Map the predicted crop to fertilizer
+X_test['Recommended Fertilizer'] = X_test['Predicted Crop'].map(fertilizer_map)
+
+# Display the test data along with predicted crop and recommended fertilizer
+print(X_test[['Predicted Crop', 'Recommended Fertilizer']])
+
+# Save the scaler and Naive Bayes model as pickle files
+with open('scaler.pkl', 'wb') as f:
     pickle.dump(scaler, f)
 
-with open('M.pkl', 'wb') as f:
+with open('model.pkl', 'wb') as f:
     pickle.dump(naive_bayes, f)
 
-print("Scaler and Model saved successfully.")
-
+print("Scaler and model saved successfully.")
