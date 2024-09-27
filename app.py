@@ -13,10 +13,10 @@ CORS(app)
 data = pd.read_csv('CP.csv')
 
 # Load the scaler and trained models
-with open('s.pkl', 'rb') as f:
+with open('SC.pkl', 'rb') as f:
     scaler = pickle.load(f)
 
-with open('m.pkl', 'rb') as f:
+with open('Model.pkl', 'rb') as f:
     rforest = pickle.load(f)
 
 # Add a route for the home page
